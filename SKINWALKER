@@ -1,0 +1,48 @@
+getgenv().settings = {
+    auto_shoot = true;
+    auto_store = true;
+};
+
+if (getgenv().execute) then
+    return;
+end;
+
+getgenv().execute = true;
+
+-- variables
+local replicated_storage = game:GetService("ReplicatedStorage");
+local run_service = game:GetService("RunService");
+local players = game:GetService("Players");
+local local_player = players.LocalPlayer;
+
+-- script variables
+local skin_walkers = workspace.Runners.Skinwalkers;
+local shoot_remote = replicated_storage.Remotes.SniperShot;
+local store_remote = replicated_storage.Remotes.Store;
+
+-- functions
+local kill_player = function(player)
+    local head = player:FindFirstChild("Head");
+    if (not head) then
+        return;
+    end;
+
+    -- variables
+    local head_position = head.Position;
+
+    -- auto shoot
+    if (getgenv().settings["auto_shoot"]) then
+        shoot_remote:FireServer(head_position, head_position, head);
+    end;
+    
+    -- auto store
+    if (getgenv().settings["auto_store"]) then
+        store_remote:FireServer(player);
+    end;
+end;
+
+for _,v in skin_walkers:GetChildren() do
+    kill_player(v);
+end;
+
+skin_walkers.ChildAdded:Connect(kill_player);
